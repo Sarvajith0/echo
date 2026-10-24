@@ -1,7 +1,7 @@
 import numpy as np, torch, psycopg
 from pgvector.psycopg import register_vector
 from transformers import ClapModel, ClapProcessor
-
+import clap_test
 MODEL_NAME = "laion/clap-htsat-unfused"
 model = ClapModel.from_pretrained(MODEL_NAME).eval()
 proc = ClapProcessor.from_pretrained(MODEL_NAME)
@@ -11,7 +11,7 @@ register_vector(conn)
 def search(query, k=10):
     inputs = proc(text=[query], return_tensors="pt", padding=True)
     with torch.no_grad():
-        q = to_tensor(model.get_text_features(**inputs)[0].numpy())
+        q = clap_test.to_tensor(model.get_text_features(**inputs)[0].numpy())
     q = q / np.linalg.norm(q)
     return conn.execute(
         "SELECT id, title, artist, genre, emb <=> %s AS dist "
